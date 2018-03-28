@@ -24,6 +24,24 @@ int main(int argc, char *argv[])
         qDebug() << db.lastError().number();
         qDebug() <<  db.isValid();
     }
+    QSqlQuery query;
+    qDebug() << query.exec("SELECT * FROM asiakas");
+
+    /*
+    while(query.next()) {
+        int id = query.value(0).toInt();
+        QString etunimi = query.value(1).toString();
+        QString sukunimi = query.value(2).toString();
+        qDebug() << id << etunimi << sukunimi;
+    }*/
+    query.last();
+    for(int i = 0; i < 3; i++) {
+        int id = query.value(0).toInt();
+        QString etunimi = query.value(1).toString();
+        QString sukunimi = query.value(2).toString();
+        qDebug() << id << etunimi << sukunimi;
+        query.previous();
+    }
 
     return a.exec();
 }
