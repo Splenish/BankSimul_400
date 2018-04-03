@@ -1,16 +1,16 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-03-27T18:44:11
+# Project created by QtCreator 2018-03-29T12:59:03
 #
 #-------------------------------------------------
 
-QT       -= gui
+QT       += core gui
 QT += sql
 
-TARGET = MySqlDLL
-TEMPLATE = lib
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-DEFINES += MYSQLDLL_LIBRARY
+TARGET = testEXE
+TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -23,18 +23,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+
 SOURCES += \
-        mysqldll.cpp \
-    queryengine.cpp \
-    session.cpp
+        main.cpp \
+        mainwindow.cpp
 
 HEADERS += \
-        mysqldll.h \
-        mysqldll_global.h \   
-    queryengine.h \
-    session.h
+        mainwindow.h
 
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
+FORMS += \
+        mainwindow.ui
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-MySqlDLL-Desktop_Qt_5_10_0_MinGW_32bit-Debug/release/ -lMySqlDLL
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-MySqlDLL-Desktop_Qt_5_10_0_MinGW_32bit-Debug/debug/ -lMySqlDLL
+
+INCLUDEPATH += $$PWD/../MySqlDLL
+DEPENDPATH += $$PWD/../MySqlDLL
