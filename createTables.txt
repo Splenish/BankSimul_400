@@ -1,0 +1,42 @@
+CREATE TABLE account(
+account_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+client_id INT NOT NULL, 
+balance FLOAT NOT NULL,
+FOREIGN KEY(client_id) REFERENCES client(client_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE transaction(
+transaction_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+account_id INT NOT NULL,
+date DATETIME NOT NULL,
+amount FLOAT NOT NULL,
+type VARCHAR(50) NOT NULL,
+FOREIGN KEY(account_id) REFERENCES account(account_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE client(
+client_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+first_name VARCHAR(50) NOT NULL,
+last_name VARCHAR(50) NOT NULL,
+address VARCHAR(50),
+phone_number VARCHAR(50)
+);
+
+CREATE TABLE card(
+card_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+account_id INT NOT NULL,
+card_number VARCHAR(50) NOT NULL,
+pincode VARCHAR(10) NOT NULL,
+FOREIGN KEY(account_id) REFERENCES account(account_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE cryptocurrency(
+wallet_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+account_id INT UNIQUE NOT NULL,
+bitcoin FLOAT,
+ethereum FLOAT,
+ripple FLOAT,
+bitcoin_cash FLOAT,
+litecoin FLOAT,
+FOREIGN KEY(account_id) REFERENCES account(account_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
