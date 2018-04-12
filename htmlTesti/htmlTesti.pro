@@ -1,15 +1,14 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2018-03-29T12:59:03
+# Project created by QtCreator 2018-04-10T09:22:14
 #
 #-------------------------------------------------
 
-QT       += core gui
-QT += sql network
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = testEXE
+TARGET = htmlTesti
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -33,9 +32,3 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-MySqlDLL-Desktop_Qt_5_10_0_MinGW_32bit-Debug/release/ -lMySqlDLL
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-MySqlDLL-Desktop_Qt_5_10_0_MinGW_32bit-Debug/debug/ -lMySqlDLL
-
-INCLUDEPATH += $$PWD/../MySqlDLL
-DEPENDPATH += $$PWD/../MySqlDLL

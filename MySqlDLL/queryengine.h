@@ -6,7 +6,9 @@
 #include <QtSql>
 #include <QDebug>
 #include <QSqlDatabase>
+#include <QVariant>
 #include "session.h"
+#include "cryptocurrency.h"
 
 class QueryEngine
 {
@@ -15,8 +17,13 @@ public:
     void connectToDatabase();
     bool getAccountID(QString card_number);
     bool checkPincode(QString pincode);
+    void setSessionData();
+    QString getSessionData(QString key);
+    void closeConnection();
+    bool withdrawal(float amount);
+    bool buyCryptoEur(QString coin, float amount);
 private:
-    Session* newSession;
+    QSqlDatabase db;
 };
 
 #endif // QUERYENGINE_H

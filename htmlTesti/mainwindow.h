@@ -2,8 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QStringList>
-#include "mysqldll.h"
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QUrl>
+#include <QString>
 
 
 namespace Ui {
@@ -20,7 +23,11 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    MySqlDLL *DLLobject;
+    QNetworkAccessManager *manager;
+    QNetworkRequest request;
+private slots:
+    void managerFinished(QNetworkReply *reply);
+    void on_pushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT += sql
+QT += sql network core
 
 TARGET = MySqlDLL
 TEMPLATE = lib
@@ -26,13 +26,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         mysqldll.cpp \
     queryengine.cpp \
-    session.cpp
+    session.cpp \
+    transaction.cpp \
+    cryptocurrency.cpp
 
 HEADERS += \
         mysqldll.h \
         mysqldll_global.h \   
     queryengine.h \
-    session.h
+    session.h \
+    transaction.h \
+    cryptocurrency.h
 
 unix {
     target.path = /usr/lib

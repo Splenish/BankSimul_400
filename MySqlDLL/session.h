@@ -3,22 +3,36 @@
 
 /*#include <QString>
 #include <QtSql>
-#include <QDebug>
+
 #include <QSqlDatabase>*/
 #include <QStringList>
+#include <QDebug>
+#include <QHash>
 
 class Session
 {
 public:
     Session();
-    void setSessionAccountID(int id);
-    int getSessionAccountID();
-    void setSessionCardID(int id);
-    int getSessionCardID();
+    static void setSessionAccountID(int id);
+    static int getSessionAccountID();
+    static void setSessionCardID(int id);
+    static int getSessionCardID();
+    static void setSessionUserData(QString key, QString data);
+    static QString getSessionUserData(QString key);
+    static void clearSessionData();
+    static void setBalance(float _balance);
+    static int getBalance();
+    static void setSessionWalletData(QString key, float data);
+    static void setSessionWalletID(int ID);
+    static float getCoinBalance(QString key);
 private:
-    QStringList sessionData;
-    int sessionAccountID, sessionCardID;
-    QString sessionPincode, sessionFirstName, sessionLastName, sessionAddress, sessionPhoneNumber;
+    static QHash<QString, QString> userData;
+    static int sessionAccountID;
+    static int sessionCardID;
+    static int walletID;
+    static float balance;
+    static QHash<QString, float> cryptoWallet;
+    //static QString sessionPincode;
 };
 
 #endif // SESSION_H

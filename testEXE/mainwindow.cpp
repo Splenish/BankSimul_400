@@ -10,7 +10,20 @@ MainWindow::MainWindow(QWidget *parent) :
     DLLobject->databaseConnect();
     if(DLLobject->validateCard("testcard1")) {
         DLLobject->validatePincode("1234");
+        qDebug() << DLLobject->getUserData("first_name");
+        qDebug() << DLLobject->getUserData("last_name");
     }
+    //qDebug() << DLLobject->getSessionBalance();
+    //DLLobject->withdrawalEvent(5000);
+    //QStringList transactionList = DLLobject->getTransactions();
+    /*for(int i = 0; i < transactionList.size(); i++) {
+        qDebug() << transactionList[i];
+    }*/
+    //qDebug() << "tän pitäs olla xrp kurssi: " << DLLobject->getCoinValue("xrp");
+    qDebug() << "btc ja xrp balance " << DLLobject->getUserCoinBalance("btc") << " " << DLLobject->getUserCoinBalance("xrp");
+    qDebug() << "ota mut ja lähetää vittuu";
+    DLLobject->buyCryptoWithEurEvent("xrp", 20);
+    DLLobject->disconnect();
 
 }
 

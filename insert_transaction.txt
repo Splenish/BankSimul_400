@@ -1,0 +1,1 @@
+INSERT INTO transaction (account_id, date, amount, type) VALUES (1, now(), 20, "nosto");
