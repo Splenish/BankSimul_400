@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
         qDebug() << DLLobject->getUserData("last_name");
     }
     //qDebug() << DLLobject->getSessionBalance();
-    //DLLobject->withdrawalEvent(20);
+
     //QStringList transactionList = DLLobject->getTransactions();
     /*for(int i = 0; i < transactionList.size(); i++) {
         qDebug() << transactionList[i];
@@ -31,12 +31,15 @@ MainWindow::MainWindow(QWidget *parent) :
     //qDebug() << "is card locked" << DLLobject->isCardLocked();
     //DLLobject->buyCryptoEvent("xrp", 1);
     ui->btcKurssiValue->setText(QString::number(DLLobject->getCoinValue("btc")));
+    ui->saldoValue->setText(QString::number(DLLobject->getSessionBalance()));
     /*timer = new QTimer;
     timer->setInterval(30);
     connect(timer, &QTimer::timeout, this, &MainWindow::updateCurrency);
     timer->start();*/
     //DLLobject->buyCryptoEvent("eth", 20);
-    //DLLobject->sellCryptoEvent("bch", 3);
+    DLLobject->sellCryptoEvent("xrp", 36);
+    //DLLobject->withdrawalEvent(20);
+    qDebug() << DLLobject->getSessionBalance();
 
 }
 
@@ -86,11 +89,15 @@ void MainWindow::on_edellinenButton_clicked()
 
     if(!(transactions.length() < 10)) {
         pagecount++;
-        ui->transactionList->clear();
-        transactions = DLLobject->getTransactions(pagecount);
         qDebug() << pagecount;
-        for(int i = 0; i < transactions.length(); i++) {
-            ui->transactionList->addItem(transactions[i]);
+        transactions = DLLobject->getTransactions(pagecount);
+        qDebug() << "length" << transactions.length();
+        if(transactions.length() > 0) {
+            ui->transactionList->clear();
+            for(int i = 0; i < transactions.length(); i++) {
+                //qDebug() << "pläräsplörös";
+                ui->transactionList->addItem(transactions[i]);
+            }
         }
     }
 

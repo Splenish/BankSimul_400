@@ -27,7 +27,7 @@ public:
     float getSessionBalance();
     QStringList getTransactions();
     QStringList getTransactions(int page);
-    bool withdrawalEvent(int amount);
+    bool withdrawalEvent(float amount);
     float getCoinValue(QString coin);
     float getUserCoinBalance(QString coin);
     bool buyCryptoEvent(QString coin, float euroAmount);

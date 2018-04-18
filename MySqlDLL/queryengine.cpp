@@ -68,6 +68,7 @@ bool QueryEngine::checkPincode(QString pincode) {
 
 void QueryEngine::setSessionData() {
     QSqlQuery query;
+    query.setNumericalPrecisionPolicy(QSql::HighPrecision);
     query.exec("SELECT account.client_id, client.first_name, client.last_name, client.address, client.phone_number, account.balance FROM account INNER JOIN client ON account.client_id = client.client_id WHERE account.account_id = "
                + QString::number(Session::getSessionAccountID()) + ";");
     //qDebug() << "session query size: "  << query.size();
@@ -108,13 +109,15 @@ void QueryEngine::closeConnection() {
 }
 
 bool QueryEngine::withdrawal(float amount) {
-    float newBalance = Session::getBalance() - amount;
+    float newBalance = (float)Session::getBalance() - (float)amount;
+    qDebug() << "tää on uus balance withdrawalis:" << newBalance;
     if(newBalance < 0) {
         qDebug() << "ei tarpeeks rahea";
         return false;
     } else {
         db.transaction();
         QSqlQuery query;
+        query.setNumericalPrecisionPolicy(QSql::HighPrecision);
         query.exec("UPDATE account SET balance = " + QString::number(newBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
         //qDebug() << "update size:" << query.numRowsAffected();
         if (query.numRowsAffected() < 1) {
@@ -156,6 +159,7 @@ bool QueryEngine::buyCryptoEur(QString coin, float amountEur) {
         //qDebug() << "Vanha kryptobalance" << Session::getCoinBalance(coin);
         //qDebug() << "uus kryptobalance" << newCryptoBalance;
         QSqlQuery query;
+        query.setNumericalPrecisionPolicy(QSql::HighPrecision);
         query.exec("UPDATE cryptocurrency SET " + coin + " = " + QString::number(newCryptoBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
         //qDebug() << "num rows affected" << query.numRowsAffected();
         if(query.numRowsAffected() < 1) {
@@ -192,6 +196,7 @@ bool QueryEngine::buyCryptoEur(QString coin, float amountEur) {
 bool QueryEngine::sellCrypto(QString coin, float cryptoAmount) {
     float gainedEur = cryptoAmount * Cryptocurrency::getCourse(coin);
     float newEurBalance = Session::getBalance() + gainedEur;
+    qDebug() << "uus eurobalance myynnissä:" << newEurBalance;
     float newCryptoBalance = Session::getCoinBalance(coin) - cryptoAmount;
     if(newCryptoBalance < 0) {
         qDebug() << "Not enough" << coin << "balance";
@@ -200,6 +205,7 @@ bool QueryEngine::sellCrypto(QString coin, float cryptoAmount) {
         qDebug() << "saadut eurot" << gainedEur;
         db.transaction();
         QSqlQuery query;
+        query.setNumericalPrecisionPolicy(QSql::HighPrecision);
         query.exec("UPDATE cryptocurrency SET " + coin + " = " + QString::number(newCryptoBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
         if(query.numRowsAffected() < 1) {
             qDebug() << "Transaction failed (failed to update crypto balance)";
@@ -225,6 +231,7 @@ bool QueryEngine::sellCrypto(QString coin, float cryptoAmount) {
                 } else {
                     qDebug() << "Sell succeeded";
                     db.commit();
+                    Session::setBalance(newEurBalance);
                     return true;
                 }
             }

@@ -21,7 +21,7 @@ public:
     static QString getSessionUserData(QString key);
     static void clearSessionData();
     static void setBalance(float _balance);
-    static int getBalance();
+    static float getBalance();
     static void setSessionWalletData(QString key, float data);
     static void setSessionWalletID(int ID);
     static float getCoinBalance(QString key);

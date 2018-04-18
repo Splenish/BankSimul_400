@@ -77,7 +77,7 @@ QStringList MySqlDLL::getTransactions(int page) {
 }
 
 //Vähentää käyttäjän tililtä nostetun summan ja tekee tietokantaan tilitapahtuman nostosta.
-bool MySqlDLL::withdrawalEvent(int amount) {
+bool MySqlDLL::withdrawalEvent(float amount) {
     return engine->withdrawal(amount);
 }
 

@@ -50,7 +50,7 @@ void Session::setBalance(float _balance) {
     balance = _balance;
 }
 
-int Session::getBalance() {
+float Session::getBalance() {
     return balance;
 }
 

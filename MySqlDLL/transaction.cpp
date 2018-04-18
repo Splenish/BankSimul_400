@@ -32,18 +32,23 @@ QStringList Transaction::lastTransactions(int page) {
                + QString::number(Session::getSessionAccountID()) + ";");
     qDebug() << "size:" << query.size();
     int index = query.size() - page*10;
-    query.seek(index-1);
+    //query.seek(index-1);
+    query.seek(index);
 
     for(int i = 0; i < transactionCheckAmount; i++) {
         QString tapahtumaData;
-        for(int j = 0; j < transactionColumns; j++) {
-            tapahtumaData = tapahtumaData + query.value(j).toString() + " ";
-        }
-        tilitapahtumat << tapahtumaData;
         if(!query.previous()) {
             qDebug() << "no more data";
             break;
         }
+        for(int j = 0; j < transactionColumns; j++) {
+            tapahtumaData = tapahtumaData + query.value(j).toString() + " ";
+        }
+        tilitapahtumat << tapahtumaData;
+        /*if(!query.previous()) {
+            qDebug() << "no more data";
+            break;
+        }*/
     }
     return tilitapahtumat;
 }
