@@ -19,10 +19,14 @@ void QueryEngine::connectToDatabase() {
     db.setPassword("root");
     */
     bool ok = db.open();
-    qDebug() << "db is valid :" << db.isValid();
-    qDebug() << "db database name" << db.databaseName();
-    qDebug() << "db isopen error" << db.isOpenError();
-    qDebug() << "db open" << ok;
+    if(ok)
+        qDebug() << "Connection open";
+    else
+        qDebug() << "Connection failed to open";
+    //qDebug() << "db is valid :" << db.isValid();
+    //qDebug() << "db database name" << db.databaseName();
+    //qDebug() << "db isopen error" << db.isOpenError();
+    //qDebug() << "db open" << ok;
 }
 
 bool QueryEngine::getAccountID(QString card_number) {
@@ -74,7 +78,7 @@ void QueryEngine::setSessionData() {
     Session::setSessionUserData("phone_number", query.value(4).toString()); //phone number
     Session::setBalance(query.value(5).toFloat());
 
-    query.exec("SELECT wallet_id, bitcoin, ethereum, ripple, bitcoin_cash, litecoin FROM cryptocurrency WHERE account_id = "
+    query.exec("SELECT wallet_id, btc, eth, xrp, bch, ltc FROM cryptocurrency WHERE account_id = "
                + QString::number(Session::getSessionAccountID()) + ";");
     //qDebug() << query.size();
     query.first();
@@ -109,40 +113,147 @@ bool QueryEngine::withdrawal(float amount) {
         qDebug() << "ei tarpeeks rahea";
         return false;
     } else {
-        Session::setBalance(newBalance);
+        db.transaction();
         QSqlQuery query;
         query.exec("UPDATE account SET balance = " + QString::number(newBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
-        qDebug() << "update size:" << query.numRowsAffected();
+        //qDebug() << "update size:" << query.numRowsAffected();
         if (query.numRowsAffected() < 1) {
+            db.rollback();
+            qDebug() << "Withdrawal failed";
             return false;
         } else {
             query.prepare("INSERT INTO transaction (account_id, date, amount, type) VALUES (?, now(), ?, \"nosto\")");
             query.addBindValue(Session::getSessionAccountID());
             query.addBindValue(amount);
             query.exec();
-            qDebug() << "insert size:" << query.numRowsAffected();
-            qDebug() << "Uus saldo:" << Session::getBalance();
+            //qDebug() << "insert size:" << query.numRowsAffected();
             if (query.numRowsAffected() < 1) {
+                db.rollback();
+                qDebug() << "Transaction failed";
                 return false;
             }
         }
-        qDebug() << "onnistu";
+        qDebug() << "Transaction succeeded";
+        Session::setBalance(newBalance);
+        //qDebug() << "Uus saldo:" << Session::getBalance();
+        db.commit();
         return true;
     }
 }
 
-bool QueryEngine::buyCryptoEur(QString coin, float amount) {
-    float cryptoAmount =  (amount / Cryptocurrency::getCourse(coin));
-    qDebug() << "ripple course " << Cryptocurrency::getCourse(coin);
-    qDebug() << "paljolla ostetaan " << amount;
-    float newBalance = Session::getBalance() - amount;
+bool QueryEngine::buyCryptoEur(QString coin, float amountEur) {
+    float cryptoAmount =  (amountEur / Cryptocurrency::getCourse(coin));
+    //qDebug() << "ripple course " << Cryptocurrency::getCourse(coin);
+    //qDebug() << "paljolla ostetaan " << amount;
+    float newBalance = Session::getBalance() - amountEur;
     if(newBalance < 0) {
         qDebug() << "Not enough balance";
         return false;
     } else {
+        db.transaction();
         qDebug() << "näin paljon saat cryptorahaa: " << cryptoAmount << coin;
-        return true;
+        float newCryptoBalance = Session::getCoinBalance(coin) + cryptoAmount;
+        //qDebug() << "Vanha kryptobalance" << Session::getCoinBalance(coin);
+        //qDebug() << "uus kryptobalance" << newCryptoBalance;
+        QSqlQuery query;
+        query.exec("UPDATE cryptocurrency SET " + coin + " = " + QString::number(newCryptoBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
+        //qDebug() << "num rows affected" << query.numRowsAffected();
+        if(query.numRowsAffected() < 1) {
+            qDebug() << "Transaction failed (failed to update cryptocurrency)";
+            db.rollback();
+            return false;
+        } else {
+            query.exec("UPDATE account SET balance = " + QString::number(newBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
+            if(query.numRowsAffected() < 1) {
+                qDebug() << "Transaction failed (failed to update balance)";
+                db.rollback();
+                return false;
+            } else {
+                query.prepare("INSERT INTO transaction (account_id, date, amount, type) VALUES (?, now(), ?, ?);");
+                query.addBindValue(Session::getSessionAccountID());
+                query.addBindValue(-amountEur);
+                QString typeStr = coin + "/osto";
+                query.addBindValue(typeStr);
+                query.exec();
+                if(query.numRowsAffected() < 1) {
+                    db.rollback();
+                    qDebug() << "Transaction failed (failed to create transaction)";
+                    return false;
+                } else {
+                    Session::setBalance(newBalance);
+                    qDebug() << "Purchase succeeded";
+                    return true;
+                }
+            }
+        }
     }
+}
+
+bool QueryEngine::sellCrypto(QString coin, float cryptoAmount) {
+    float gainedEur = cryptoAmount * Cryptocurrency::getCourse(coin);
+    float newEurBalance = Session::getBalance() + gainedEur;
+    float newCryptoBalance = Session::getCoinBalance(coin) - cryptoAmount;
+    if(newCryptoBalance < 0) {
+        qDebug() << "Not enough" << coin << "balance";
+        return false;
+    } else {
+        qDebug() << "saadut eurot" << gainedEur;
+        db.transaction();
+        QSqlQuery query;
+        query.exec("UPDATE cryptocurrency SET " + coin + " = " + QString::number(newCryptoBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
+        if(query.numRowsAffected() < 1) {
+            qDebug() << "Transaction failed (failed to update crypto balance)";
+            db.rollback();
+            return false;
+        } else {
+            query.exec("UPDATE account SET balance = " + QString::number(newEurBalance) + " WHERE account_id = " + QString::number(Session::getSessionAccountID()) + ";");
+            if(query.numRowsAffected() < 1) {
+                qDebug() << "Transaction failed (failed to update balance)";
+                db.rollback();
+                return false;
+            } else {
+                query.prepare("INSERT INTO transaction (account_id, date, amount, type) VALUES (?, now(), ?, ?);");
+                query.addBindValue(Session::getSessionAccountID());
+                query.addBindValue(gainedEur);
+                QString typeStr = coin + "/osto";
+                query.addBindValue(typeStr);
+                query.exec();
+                if(query.numRowsAffected() < 1) {
+                    qDebug() << "Transaction failed (failed to create transaction)";
+                    db.rollback();
+                    return false;
+                } else {
+                    qDebug() << "Sell succeeded";
+                    db.commit();
+                    return true;
+                }
+            }
+        }
+        //return true;
+    }
+}
+
+bool QueryEngine::lockCard() {
+    QSqlQuery query;
+    query.exec("UPDATE card SET locked = 1 WHERE card_id = " + QString::number(Session::getSessionCardID()) + ";");
+    if(query.numRowsAffected() > 0) {
+        qDebug() << "Card locked";
+        return true;
+    } else {
+        qDebug() << "Locking card failed";
+        return false;
+    }
+}
 
 
+bool QueryEngine::isCardLocked() {
+    QSqlQuery query;
+    query.exec("SELECT locked FROM card WHERE card_id = " + QString::number(Session::getSessionCardID()) + ";");
+    query.first();
+    int test = query.value(0).toUInt();
+    if(test) {
+        return true;
+    } else {
+        return false;
+    }
 }

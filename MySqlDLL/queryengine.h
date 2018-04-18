@@ -21,7 +21,10 @@ public:
     QString getSessionData(QString key);
     void closeConnection();
     bool withdrawal(float amount);
-    bool buyCryptoEur(QString coin, float amount);
+    bool buyCryptoEur(QString coin, float amountEur);
+    bool sellCrypto(QString coin, float cryptoAmount);
+    bool lockCard();
+    bool isCardLocked();
 private:
     QSqlDatabase db;
 };
